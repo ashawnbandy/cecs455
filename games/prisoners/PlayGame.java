@@ -12,12 +12,13 @@ import java.util.TreeMap;
 
 public class PlayGame {
 	private TreeMap<Integer,Integer> scores=new TreeMap<Integer,Integer>();
+	// TODO: add the id of any extra players you'd like to
 	public int[] id={1111,2222,3333};
 	
 	private int score(boolean me, boolean you) {
 		if (me&&you) return 4;
-		if (me&&!you) return 7;
-		if (!me&&you) return 0;
+		if (me&&!you) return 0;
+		if (!me&&you) return 7;
 		if (!me&&!you) return 1;
 		throw new RuntimeException("This should never happen.");
 	}
@@ -45,27 +46,39 @@ public class PlayGame {
 					if (!scores.containsKey(id[i])) throw new RuntimeException("Player has no score.");
 					if (!scores.containsKey(id[j])) throw new RuntimeException("Player has no score.");
 					System.out.print("Player "+id[i]+" versus Player "+id[j]+"["+scores.get(id[i])+","+scores.get(id[j])+"]... ");
-					PreviousGames games=new PreviousGames();
+					TreeMap<Integer,PreviousGames> gamesMap=new TreeMap<Integer,PreviousGames>();
+					gamesMap.put(id[i], new PreviousGames());
+					gamesMap.put(id[j], new PreviousGames());
 					boolean done=false;
 					while (!done) {
-						games.previous.put(id[i], iPlays);
-						games.previous.put(id[j], jPlays);
+						PreviousGames games=gamesMap.get(id[i]);
+						games.hisPreviousMoves=jPlays;
+						games.myPreviousMoves=iPlays;
 						Boolean iCurrent=new Strategies().getResult(id[i], games);
 						if (iCurrent==null) {
 							System.out.println("There was invalid play by "+id[i]+".");
 							logw.write("There was invalid play by "+id[i]+"."); logw.newLine();
 							done=true; continue; }
+						// There is 3% probability that you make a playing mistake.
+						int r=random.nextInt(100);
+						if ((r==1)||(r==2)||(r==3)) iCurrent=!iCurrent;
+						games=gamesMap.get(id[j]);
+						games.hisPreviousMoves=iPlays;
+						games.myPreviousMoves=jPlays;
 						Boolean jCurrent=new Strategies().getResult(id[j], games);
 						if (jCurrent==null) {
 							System.out.println("There was invalid play by "+id[j]+".");
 							logw.write("There was invalid play by "+id[j]+"."); logw.newLine();
 							done=true; continue; }
+						// 3% probability of mistake
+						r=random.nextInt(100);
+						if ((r==1)||(r==2)||(r==3)) jCurrent=!jCurrent;
 						iPlays.add(iCurrent); jPlays.add(jCurrent);
 						
 						// update score
 						scores.put(id[i], scores.get(id[i])+score(iCurrent,jCurrent));
 						scores.put(id[j], scores.get(id[j])+score(jCurrent,iCurrent));
-						done=(random.nextInt(200)==1);
+						done=(random.nextInt(1000)==1);
 					}
 					System.out.println("["+scores.get(id[i])+","+scores.get(id[j])+"] done.");
 					logw.write(""+id[i]+": "+iPlays); logw.newLine();

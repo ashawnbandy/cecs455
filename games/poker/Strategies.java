@@ -14,14 +14,33 @@ public class Strategies {
 			// This will choose the 0 card if it is larger than the 1 card.
 		}
 		public Integer play(PlayerGameState state) {
-			if (state.playsThusFar.size()<=400)
+			if (state.playsThusFar.size()<400)
 				return 0; else return 1;
 			// If there have been fewer than 400 moves thus far in the game, this player will pass.
 			// Otherwise, he will call.
 		}
 	}
 	
-	// TODO: Create Players 2222 and 3333 exactly as above.
+	private class Player2222 {
+		public Boolean initialPlay(PlayerGameState state) {
+			return (new Random().nextBoolean());
+		}
+		public Integer play(PlayerGameState state) {
+			return (new Random().nextInt(4)-1);
+		}
+	}
+	
+	private class Player3333 {
+		public Boolean initialPlay(PlayerGameState state) {
+			return (new Random().nextBoolean());
+		}
+		public Integer play(PlayerGameState state) {
+			if (new Random().nextBoolean()) return 2; else return 0;
+		}
+	}
+	
+	// TODO: You should write a class for PlayerXXXX (where XXXX is the last 4 digits of your student ID) and
+	// execute this code. You will only turn in a file that consists of a player class that you write yourself.
 	
 	public class InitialThread extends Thread {
 		private PlayerGameState state; private InitialResultClass result; private int id;
@@ -39,12 +58,14 @@ public class Strategies {
 		private PlayerGameState state; private ResultClass result; private int id;
 		public PlayThread(PlayerGameState s, ResultClass r, int identification) { state=s; result=r; id=identification; }
 		public void run() {
+			try {
 			switch (id) {
 			case 1111: result.result=new Player1111().play(state); break;
 			case 2222: result.result=new Player2222().play(state); break;
 			case 3333: result.result=new Player3333().play(state); break;
 			default: throw new RuntimeException("Unsupported player.");	}
-			result.valid=true;
+			result.valid=true; }
+			catch (Exception e) { result.valid=false; }
 		}		
 	}
 	

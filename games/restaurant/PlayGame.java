@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 public class PlayGame {
 	private TreeMap<Integer,Integer> scores=new TreeMap<Integer,Integer>();
+	// TODO: add the id of any extra players you'd like to
 	public int[] id={1111,2222,3333};
 
 	private int chooseNumRestaurants() {
@@ -47,16 +48,17 @@ public class PlayGame {
 			
 			logw=new BufferedWriter(new FileWriter(logFilename));
 
-			
 			// The number of restaurants is equal to the number of players divided by either 2, 3, or 4.
-			PreviousGames games=new PreviousGames();
-			for (int iteration=0; iteration<300; iteration++) {
+			TreeMap<Integer,PreviousGames> gamesMap=new TreeMap<Integer,PreviousGames>();
+			for (int i=0; i<id.length; i++) gamesMap.put(id[i], new PreviousGames());
+			
+			for (int iteration=0; iteration<1000; iteration++) {
 				int numRestaurants=chooseNumRestaurants();
 				ArrayList<ArrayList<Integer>> ratings=chooseRatings(numRestaurants);
 				System.out.print(ratings.toString()+": ");
 				ArrayList<Integer> choices=new ArrayList<Integer>();
 				for (int i=0; i<id.length; i++) {
-					Integer choice=new Strategies().getResult(id[i], games, ratings);
+					Integer choice=new Strategies().getResult(id[i], gamesMap.get(id[i]), ratings);
 					if ((choice==null)||(choice<0)||(choice>=ratings.size())) {
 						System.out.println("There was invalid play by "+id[i]+"."); choice=-1; }
 					choices.add(choice); }
@@ -73,11 +75,16 @@ public class PlayGame {
 							total++;
 					if (!scores.containsKey(id[i])) throw new RuntimeException("Score not found.");
 					int s=ratings.get(choices.get(i)).size();
-					scores.put(id[i], scores.get(id[i])+ratings.get(choices.get(i)).get(s-total)); }
+					scores.put(id[i], scores.get(id[i])+ratings.get(choices.get(i)).get(s-total));
+					
+					// compute the new game
+					ArrayList<Integer> others=new ArrayList<Integer>();
+					for (int j=0; j<id.length; j++)
+						if (j!=i) others.add(choices.get(j));
+					gamesMap.get(id[i]).addGame(ratings, others, choices.get(i)); }
 				logw.write(ratings.toString()); logw.newLine();
 				logw.write(choiceMap.toString()); logw.newLine();
-				logw.write("---"); logw.newLine();
-				games.addGame(ratings, choiceMap); }
+				logw.write("---"); logw.newLine(); }
 			logw.close();
 		
 			BufferedWriter bw=new BufferedWriter(new FileWriter(scoreFilename));

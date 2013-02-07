@@ -3,7 +3,7 @@ package games;
 
 public class MainClass {
 	public static void main(String[] args) {
-		// TODO: Each of these directories should be changed to reflect the place where you want your scores and logs to go.
+		// TODO: Change these paths to reflect where the files should wind up on your machine.
 		games.prisoners.PlayGame prisoners=new games.prisoners.PlayGame();
 		prisoners.runGame("C:\\Documents and Settings\\Darin\\My Documents\\eclipse-java-juno-SR1-win32\\eclipse\\workspace\\GameAssignments\\prisonerScore.txt",
 				"C:\\Documents and Settings\\Darin\\My Documents\\eclipse-java-juno-SR1-win32\\eclipse\\workspace\\GameAssignments\\prisonerLog.txt");
