@@ -5,3 +5,5 @@
 *.war
 *.ear
 /PrisonersDilemma/nbproject/private/
+/PrisonersDilemma/dist/
+/PrisonersDilemma/build/
