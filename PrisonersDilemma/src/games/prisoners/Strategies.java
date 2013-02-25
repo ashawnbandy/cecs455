@@ -41,10 +41,11 @@ public class Strategies {
         }
     }
 
+    
     private class Player5396 {
 
-        private double TRIGGER = 0.25;
-        private int EXPECTED_ROUNDS = 1000;
+        private double TRIGGER = 0.75;
+        private int EXPECTED_ROUNDS = 5000;
         private double curve = 0;
         private double his_curve = 0;
         private Random gen = new Random();
@@ -52,7 +53,6 @@ public class Strategies {
         public Boolean play(PreviousGames games) {
 
             if (games.hisPreviousMoves.size() <= 10) {
-                System.out.println("Size is less than 10. returning true.");
                 return true;
             }
             int coop = 0;

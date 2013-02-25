@@ -10,9 +10,11 @@ package games.prisoners;
  */
 public class Main {
     public static void main(String[] args) {
-        PlayGame p = new PlayGame();
-        for(int i=0;i<=30;i++)
-            p.runGame("score.log", "log.log");
+        Analysis a = new Analysis("/Users/Shawn/Downloads/LOG/prisonerLog.txt");
+        a.calculateStats();
+//        PlayGame p = new PlayGame();
+//        for(int i=0;i<=30;i++)
+//            p.runGame("score.log", "log.log");
         
     }
 }
