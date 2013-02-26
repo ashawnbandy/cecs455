@@ -139,8 +139,7 @@ public class Analysis {
                 System.out.print(" " + cov);
                 SimpleRegression p1_sr = new SimpleRegression();
                 SimpleRegression p2_sr = new SimpleRegression();
-                p2_sr.addData(p1_moves_d,p2_moves_d);
-                System.out.print(" " + )
+
                 System.out.print("\n");
                 } catch (Exception e) {
                     System.err.println(e);

@@ -30,19 +30,64 @@ public class Strategies {
         }
     }
 
-    private class Player5555 {
+        private class Player5396 {
 
-        public Boolean play(PreviousGames games) {
-            if (games.hisPreviousMoves.size() < 1) {
-                return false;
-            } else {
-                return games.hisPreviousMoves.get(games.hisPreviousMoves.size() - 1);
+            public Boolean play(PreviousGames games) {
+
+                if (games.hisPreviousMoves.size() <= 5) {
+                    return true;
+                }
+                int n = (games.hisPreviousMoves.size() <= 100) ? games.hisPreviousMoves.size() : 100;
+                double ht_given_mf = 0.0;
+                double mt_given_hf = 0.0;
+                double ht = 0.0;
+                double hf = 0.0;
+                double mf = 0.0;
+                for(int i = games.hisPreviousMoves.size()-n+1;i <= games.hisPreviousMoves.size()-1;i++) {
+                    if(games.hisPreviousMoves.get(i) == true) {
+                        ht++;
+                        if(games.myPreviousMoves.get(i) == false) {
+                            ht_given_mf++;
+                        }
+                    } else {
+                        hf++;
+                    }
+                    if(games.myPreviousMoves.get(i) == false) {
+                        mf++;
+                        if(games.hisPreviousMoves.get(i) == true) {
+                            mt_given_hf++;
+                        }
+                    }
+                }
+
+                if(mf == 0){
+                    System.out.println(" mf-0-false");
+                    return false;
+                }
+
+                double ratio = (double)(ht / (n-1));
+                double p_ratio = ht_given_mf / mf;
+                double f_ratio = mt_given_hf / hf;
+                System.out.print("n: " + n + " ht: " + ht + " hf: " + hf + " ht_given_mf: " + ht_given_mf + " mf: " + mf + " ratio: " + ratio
+                        + " ratio check: " + (ratio > (.80) || ratio < (0.125)) + " p_ratio: " + p_ratio);
+                if(ratio > (0.80) || ratio < (0.10)) {
+                    System.out.println(" rc-false ");
+                    return false;
+                }
+                java.util.Random r = new Random();
+
+
+
+
+                double rr = r.nextDouble();
+                System.out.println(" p_ratio: " + p_ratio + " rr:" + rr + " p_ratio check: " + (p_ratio < rr));
+
+                return (f_ratio < (p_ratio - 0.25)) ? true : false;
             }
         }
-    }
 
     
-    private class Player5396 {
+    private class Player5555 {
 
         private double TRIGGER = 0.75;
         private int EXPECTED_ROUNDS = 5000;
@@ -73,23 +118,19 @@ public class Strategies {
             }
             curve = (1 - TRIGGER) / java.lang.Math.log1p(EXPECTED_ROUNDS);
             his_curve = (1 - ((double) coop / games.hisPreviousMoves.size())) / games.hisPreviousMoves.size();
-            System.out.print("My curve: " + curve + " His curve: " + his_curve);
+
             curve = (curve > his_curve ? curve : his_curve);
-            System.out.print(" Using curve: " + curve);
-            System.out.print(" His plays: " + ((double) coop / games.hisPreviousMoves.size()));
-            System.out.print(" My plays: " + ((double) me / games.myPreviousMoves.size()));
+
             if (((double) coop / games.hisPreviousMoves.size()) >= TRIGGER || ((double) coop_recent / 10) >= (TRIGGER)) {
 
 
                 if (gen.nextDouble() <= (curve * java.lang.Math.log1p(games.myPreviousMoves.size())) && ((double) me_recent / 10) >= (TRIGGER)) {
-                    System.out.println(" F");
+
                     return false;
                 } else {
-                    System.out.println(" T");
                     return true;
                 }
             } else {
-                System.out.println("FF");
                 return false;
             }
         }
@@ -132,7 +173,6 @@ public class Strategies {
             System.out.print(" My plays: " + ((double) me / games.myPreviousMoves.size()));
             if (((double) coop / games.hisPreviousMoves.size()) >= TRIGGER || ((double) coop_recent / 10) >= (TRIGGER)) {
 
-
                 if (gen.nextDouble() <= (curve * java.lang.Math.log1p(games.myPreviousMoves.size())) && ((double) me_recent / 10) >= (TRIGGER - 0.1)) {
                     System.out.println(" F");
                     return false;
@@ -149,54 +189,56 @@ public class Strategies {
 
     private class Player5398 {
 
-        private double TRIGGER = 0.25;
-        private int EXPECTED_ROUNDS = 1000;
-        private double curve = 0;
-        private double his_curve = 0;
-        private Random gen = new Random();
+            public Boolean play(PreviousGames games) {
 
-        public Boolean play(PreviousGames games) {
-
-            if (games.hisPreviousMoves.size() <= 10) {
-                System.out.println("Size is less than 10. returning true.");
-                return true;
-            }
-            int coop = 0;
-            int me = 0;
-            int coop_recent = 0;
-            int me_recent = 0;
-            for (Boolean m : games.hisPreviousMoves) {
-                coop += (m ? 1 : 0);
-            }
-            for (Boolean c : games.myPreviousMoves) {
-                me += (c ? 1 : 0);
-            }
-            for (int i = games.myPreviousMoves.size() - 9; i < games.myPreviousMoves.size(); i++) {
-                me_recent += (games.myPreviousMoves.get(i) ? 1 : 0);
-            }
-            for (int i = games.hisPreviousMoves.size() - 9; i < games.hisPreviousMoves.size(); i++) {
-                coop_recent += (games.hisPreviousMoves.get(i) ? 1 : 0);
-            }
-            curve = (1 - TRIGGER) / java.lang.Math.log1p(EXPECTED_ROUNDS);
-            his_curve = ((double) coop / games.hisPreviousMoves.size()) / games.hisPreviousMoves.size();
-            System.out.print(" His plays: " + ((double) coop / games.hisPreviousMoves.size()));
-            System.out.print(" My plays: " + ((double) me / games.myPreviousMoves.size()));
-            if (((double) coop / games.hisPreviousMoves.size()) >= TRIGGER) {
-
-
-                if (gen.nextDouble() <= (curve * java.lang.Math.log1p(games.myPreviousMoves.size()))) {
-                    System.out.println(" F");
-                    return false;
-                } else {
-                    System.out.println(" T");
+                if (games.hisPreviousMoves.size() <= 5) {
                     return true;
                 }
-            } else {
-                System.out.println("FF");
-                return false;
+                int n = (games.hisPreviousMoves.size() <= 100) ? games.hisPreviousMoves.size() : 100;
+                double ht_given_mf = 0.0;
+                double mt_given_hf = 0.0;
+                double ht = 0.0;
+                double hf = 0.0;
+                double mf = 0.0;
+                for(int i = games.hisPreviousMoves.size()-n+1;i <= games.hisPreviousMoves.size()-1;i++) {
+                    if(games.hisPreviousMoves.get(i) == true) {
+                        ht++;
+                        if(games.myPreviousMoves.get(i) == false) {
+                            ht_given_mf++;
+                        }
+                    } else {
+                        hf++;
+                    }
+                    if(games.myPreviousMoves.get(i) == false) {
+                        mf++;
+                        if(games.hisPreviousMoves.get(i) == true) {
+                            mt_given_hf++;
+                        }
+                    }
+                }
+
+                if(mf == 0){
+                    System.out.println(" mf-0-false");
+                    return false;
+                }
+
+                double ratio = (double)(ht / (n-1));
+                double p_ratio = ht_given_mf / mf;
+                double f_ratio = mt_given_hf / hf;
+                System.out.print("n: " + n + " ht: " + ht + " hf: " + hf + " ht_given_mf: " + ht_given_mf + " mf: " + mf + " ratio: " + ratio
+                        + " ratio check: " + (ratio > (.80) || ratio < (0.125)) + " p_ratio: " + p_ratio);
+                if(ratio > (0.80) || ratio < (0.10)) {
+                    System.out.println(" rc-false ");
+                    return false;
+                }
+                java.util.Random r = new Random();
+
+                double rr = r.nextDouble();
+                System.out.println(" p_ratio: " + p_ratio + " rr:" + rr + " p_ratio check: " + (p_ratio < rr));
+
+                return (f_ratio < (p_ratio - 0.25 * rr)) ? true : false;
             }
         }
-    }
 
     private class Player2222 {
 

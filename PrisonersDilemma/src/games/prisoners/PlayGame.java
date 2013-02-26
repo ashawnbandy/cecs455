@@ -13,7 +13,7 @@ import java.util.TreeMap;
 public class PlayGame {
 	private TreeMap<Integer,Integer> scores=new TreeMap<Integer,Integer>();
 	// TODO: add the id of any extra players you'd like to
-	public int[] id={5396,5396};
+	public int[] id={1111,2222,3333,4444,5555,5396,5397, 5398};
 	
 	private int score(boolean me, boolean you) {
 		if (me&&you) return 4;
