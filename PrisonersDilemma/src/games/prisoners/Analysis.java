@@ -26,7 +26,6 @@ public class Analysis {
         Integer observations;
         double[][][] p1_conditionals = new double[2][2][2];
         double[][][] p2_conditionals = new double[2][2][2];
-
     }
     //private java.util.Map<Integer, java.util.ArrayList<Boolean>> playerMoves = new java.util.HashMap<Integer, java.util.ArrayList<Boolean>>();
     private java.util.ArrayList<java.util.Map<Integer, java.util.ArrayList<Boolean>>> games = new java.util.ArrayList<java.util.Map<Integer, java.util.ArrayList<Boolean>>>();
@@ -113,34 +112,55 @@ public class Analysis {
                 double[][][] p2_conditional = new double[2][2][2];
                 double[][][] p1_conditional_count = new double[2][2][2];
                 double[][][] p2_conditional_count = new double[2][2][2];
+                int p1_score = 0;
+                int p2_score = 0;
                 for (int i = 0; i < p1_moves.size() - 1; i++) {
                     p1_moves_d[i] = (p1_moves.get(i)) ? 1.0 : 0.0;
                     p2_moves_d[i] = (p2_moves.get(i)) ? 1.0 : 0.0;
                     p1_stats.addValue((p1_moves.get(i)) ? 1.0 : 0.0);
                     p2_stats.addValue((p2_moves.get(i)) ? 1.0 : 0.0);
+                    if (p1_moves.get(i)) {
+                        if (p2_moves.get(i)) {
+                            p1_score += 4;
+                            p2_score += 4;
+                        } else {
+                            p1_score += 0;
+                            p2_score += 7;
+                        }
+                    } else {
+                        if (p2_moves.get(i)) {
+                            p1_score += 7;
+                            p2_score += 0;
+                        } else {
+                            p1_score += 1;
+                            p2_score += 1;
+
+                        }
+                    }
+                    System.out.print(" " + p1_score + " " + p2_score + " " + (p1_score-p2_score)+ " ");
                     if (i >= 1) {
                         p1_conditional_count[((int) p1_moves_d[i])][((int) p1_moves_d[i - 1])][((int) p2_moves_d[i - 1])] = (p1_moves.get(i)) ? 1.0 : 0.0;
-                        p2_conditional_count[((int) p1_moves_d[i])][((int) p1_moves_d[i - 1])][((int) p2_moves_d[i - 1])] = (p1_moves.get(i)) ? 1.0 : 0.0;
+                        p2_conditional_count[((int) p2_moves_d[i])][((int) p2_moves_d[i - 1])][((int) p1_moves_d[i - 1])] = (p1_moves.get(i)) ? 1.0 : 0.0;
                         p1_conditional[((int) p1_moves_d[i])][((int) p1_moves_d[i - 1])][((int) p2_moves_d[i - 1])]++;
-                        p2_conditional[((int) p1_moves_d[i])][((int) p1_moves_d[i - 1])][((int) p2_moves_d[i - 1])]++;
+                        p2_conditional[((int) p2_moves_d[i])][((int) p2_moves_d[i - 1])][((int) p1_moves_d[i - 1])]++;
                     }
                 }
                 System.out.print(" " + p1_stats.getMean() + " " + p2_stats.getMean());
                 for (int j = 0; j <= 1; j++) {
                     for (int k = 0; k <= 1; k++) {
                         for (int l = 0; l <= 1; l++) {
-                            gs.p1_conditionals[j][k][k] = (p1_conditional_count[j][k][l] / p1_conditional[j][k][l]);
-                         //   System.out.print(" " + j + k + l + " " + (p1_conditional_count[j][k][l] / p1_conditional[j][k][l]));
+                            gs.p1_conditionals[j][k][l] = (p1_conditional_count[j][k][l] / p1_conditional[j][k][l]);
+                            System.out.print(" " + j + k + l + " " + (p1_conditional_count[j][k][l] / p1_conditional[j][k][l]));
                         }
                     }
                 }
                 try {
-                double cov = new Covariance().covariance(p1_moves_d, p2_moves_d);
-                System.out.print(" " + cov);
-                SimpleRegression p1_sr = new SimpleRegression();
-                SimpleRegression p2_sr = new SimpleRegression();
+                    double cov = new Covariance().covariance(p1_moves_d, p2_moves_d);
+                    System.out.print(" " + cov);
+                    SimpleRegression p1_sr = new SimpleRegression();
+                    SimpleRegression p2_sr = new SimpleRegression();
 
-                System.out.print("\n");
+                    System.out.print("\n");
                 } catch (Exception e) {
                     System.err.println(e);
                 }

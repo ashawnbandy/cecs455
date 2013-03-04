@@ -34,55 +34,50 @@ public class Strategies {
 
             public Boolean play(PreviousGames games) {
 
-                if (games.hisPreviousMoves.size() <= 5) {
+                if (games.hisPreviousMoves.size() <= 10 ) {
                     return true;
                 }
-                int n = (games.hisPreviousMoves.size() <= 100) ? games.hisPreviousMoves.size() : 100;
-                double ht_given_mf = 0.0;
-                double mt_given_hf = 0.0;
-                double ht = 0.0;
-                double hf = 0.0;
-                double mf = 0.0;
-                for(int i = games.hisPreviousMoves.size()-n+1;i <= games.hisPreviousMoves.size()-1;i++) {
-                    if(games.hisPreviousMoves.get(i) == true) {
-                        ht++;
-                        if(games.myPreviousMoves.get(i) == false) {
-                            ht_given_mf++;
-                        }
-                    } else {
-                        hf++;
-                    }
-                    if(games.myPreviousMoves.get(i) == false) {
-                        mf++;
-                        if(games.hisPreviousMoves.get(i) == true) {
-                            mt_given_hf++;
-                        }
-                    }
+                int n = (games.hisPreviousMoves.size() <= 25) ? games.hisPreviousMoves.size() : 25;
+                int[] hisMoves = new int[n];
+                int[] myMoves = new int[n];
+                int[][][] h = new int[2][2][2];
+                int[][][] m = new int[2][2][2];
+                int[][][] hisConditionals_divisor = new int[2][2][2];
+                int[][][] myConditionals_divisor = new int[2][2][2];
+                double ht = 0;
+                double mt = 0;
+                
+                for(int i = games.hisPreviousMoves.size()-n;i < games.hisPreviousMoves.size();i++) {
+                    ht += (games.hisPreviousMoves.get(i)) ? 1 : 0;
+                    mt += (games.myPreviousMoves.get(i)) ? 1 : 0;
+                    hisMoves[(i-(games.hisPreviousMoves.size()-n))] = (games.hisPreviousMoves.get(i)) ? 1 : 0;
+                    myMoves[(i-(games.hisPreviousMoves.size()-n))] = (games.myPreviousMoves.get(i)) ? 1 : 0;
+                }                
+                double changes =0;
+                for(int i = 1;i < n;i++) {
+                    h[hisMoves[i]][myMoves[i]][myMoves[i-1]]++;
+                    m[myMoves[i]][hisMoves[i]][hisMoves[i-1]]++;
+                     changes += (hisMoves[i] != hisMoves[i-1]) ? 1 : 0;
                 }
-
-                if(mf == 0){
-                    System.out.println(" mf-0-false");
+                
+                double my_f_when_t = m[0][1][1] + m[0][1][0];
+                double his_f_when_t = h[0][1][1] + h[0][1][0];
+                double t_imbal = (mt - ht) / n;
+                double fgt_imbal = (my_f_when_t - his_f_when_t) / n;
+                if((ht/n) < 0.1 || (ht/n) > 0.9 || (changes/n) > 0.6) {
                     return false;
                 }
-
-                double ratio = (double)(ht / (n-1));
-                double p_ratio = ht_given_mf / mf;
-                double f_ratio = mt_given_hf / hf;
-                System.out.print("n: " + n + " ht: " + ht + " hf: " + hf + " ht_given_mf: " + ht_given_mf + " mf: " + mf + " ratio: " + ratio
-                        + " ratio check: " + (ratio > (.80) || ratio < (0.125)) + " p_ratio: " + p_ratio);
-                if(ratio > (0.80) || ratio < (0.10)) {
-                    System.out.println(" rc-false ");
+                if(((ht/n) > (0.57)) && (changes/n) < 0.3 &&  hisMoves[1] == 1 && new Random().nextDouble() > 0.25) {
                     return false;
                 }
-                java.util.Random r = new Random();
+                if((ht/n) > 0.57 && (changes/n) < 0.15 && hisMoves[1]==1 && hisMoves[2]==1) {
+                    return true;
+                }
+                double gen_curve = java.lang.Math.tan(((ht/n)-0.5)/(0.125*java.lang.Math.PI));
+                        
+                return ((0.1 * gen_curve + 0.2*fgt_imbal + 0.7*t_imbal) > 0);
 
 
-
-
-                double rr = r.nextDouble();
-                System.out.println(" p_ratio: " + p_ratio + " rr:" + rr + " p_ratio check: " + (p_ratio < rr));
-
-                return (f_ratio < (p_ratio - 0.25)) ? true : false;
             }
         }
 
@@ -148,7 +143,6 @@ public class Strategies {
         public Boolean play(PreviousGames games) {
 
             if (games.hisPreviousMoves.size() <= 10) {
-                System.out.println("Size is less than 10. returning true.");
                 return true;
             }
             int coop = 0;
@@ -169,19 +163,15 @@ public class Strategies {
             }
             curve = (1 - TRIGGER) / java.lang.Math.log1p(EXPECTED_ROUNDS);
             his_curve = ((double) coop / games.hisPreviousMoves.size()) / games.hisPreviousMoves.size();
-            System.out.print(" His plays: " + ((double) coop / games.hisPreviousMoves.size()));
-            System.out.print(" My plays: " + ((double) me / games.myPreviousMoves.size()));
             if (((double) coop / games.hisPreviousMoves.size()) >= TRIGGER || ((double) coop_recent / 10) >= (TRIGGER)) {
 
                 if (gen.nextDouble() <= (curve * java.lang.Math.log1p(games.myPreviousMoves.size())) && ((double) me_recent / 10) >= (TRIGGER - 0.1)) {
-                    System.out.println(" F");
+
                     return false;
                 } else {
-                    System.out.println(" T");
                     return true;
                 }
             } else {
-                System.out.println("FF");
                 return false;
             }
         }
@@ -218,23 +208,22 @@ public class Strategies {
                 }
 
                 if(mf == 0){
-                    System.out.println(" mf-0-false");
                     return false;
                 }
 
                 double ratio = (double)(ht / (n-1));
                 double p_ratio = ht_given_mf / mf;
                 double f_ratio = mt_given_hf / hf;
-                System.out.print("n: " + n + " ht: " + ht + " hf: " + hf + " ht_given_mf: " + ht_given_mf + " mf: " + mf + " ratio: " + ratio
-                        + " ratio check: " + (ratio > (.80) || ratio < (0.125)) + " p_ratio: " + p_ratio);
+//                System.out.print("n: " + n + " ht: " + ht + " hf: " + hf + " ht_given_mf: " + ht_given_mf + " mf: " + mf + " ratio: " + ratio
+//                        + " ratio check: " + (ratio > (.80) || ratio < (0.125)) + " p_ratio: " + p_ratio);
                 if(ratio > (0.80) || ratio < (0.10)) {
-                    System.out.println(" rc-false ");
+//                    System.out.println(" rc-false ");
                     return false;
                 }
                 java.util.Random r = new Random();
 
                 double rr = r.nextDouble();
-                System.out.println(" p_ratio: " + p_ratio + " rr:" + rr + " p_ratio check: " + (p_ratio < rr));
+//                System.out.println(" p_ratio: " + p_ratio + " rr:" + rr + " p_ratio check: " + (p_ratio < rr));
 
                 return (f_ratio < (p_ratio - 0.25 * rr)) ? true : false;
             }
@@ -250,7 +239,7 @@ public class Strategies {
     private class Player4444 {
 
         public Boolean play(PreviousGames games) {
-            return true;
+            return (games.hisPreviousMoves.size() >= 1) ? games.hisPreviousMoves.get(games.hisPreviousMoves.size()-1): true;
         }
     }
 
